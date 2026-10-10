@@ -15,7 +15,7 @@
 
 ## 已有仓库，不必重新创建
 
-本次准备已沿用 GitHub 的初始提交，并将 `origin` 连接到上述仓库。本地准备分支是 `codex/open-source-v0.2.0`，基于远程 `main`。不要重新 `git init`、删除 `.git` 或强制推送。
+仓库已完成首次发布，`origin` 已连接到上述仓库。后续版本在 `codex/` 开头的本地分支准备，再按下面步骤上传。不要重新 `git init`、删除 `.git` 或强制推送。
 
 源码包括 JSX、Python 后端、公开测试、构建脚本和说明。`.gitignore` 使用允许清单，排除 ODB、EPS、缓存、旧实验、Python 安装目录与 ZIP。以后新增源码文件时，记得按需更新允许清单。
 
@@ -52,7 +52,7 @@ git diff --cached --name-only
 检查列表应当是代码和说明，不能包含真实 ODB、EPS 或缓存。确认内容后执行：
 
 ```powershell
-git commit -m "Prepare v0.2.0 public source and documentation"
+git commit -m "Support nonuniform deformation scaling in v0.2.1"
 ```
 
 如果提示没有需要提交的变化，可用 `git log -1 --oneline` 查看最近记录，无需重复提交。
@@ -67,17 +67,17 @@ git push origin HEAD:main
 
 成功后刷新 GitHub 仓库首页，应看到完整 README 与源码。若出现 `non-fast-forward`，说明远程有新的提交；先获取并合并远程变化，不要添加 `--force`。若提示认证或分支保护错误，保留错误文字，按错误原因处理。
 
-后续修改通常重复“检查 → add → commit → push”。本地仍叫 `codex/open-source-v0.2.0` 不影响已推送到远程 `main`。
+后续修改通常重复“检查 → add → commit → push”。本地分支名可以与远程 `main` 不同。
 
 GitHub 官方：[把本地代码加入 GitHub](https://docs.github.com/en/migrations/importing-source-code/using-the-command-line-to-import-source-code/adding-locally-hosted-code-to-github)。
 
-## 5. 发布完整运行包 v0.2.0
+## 5. 发布完整运行包（以 v0.2.1 为例）
 
 1. 先完成源码推送，再进入仓库的 **Releases**，创建新 Release。
-2. 标签填写 `v0.2.0`，目标选择 `main`。如果已有同名标签或版本，请先检查，不要覆盖已有发布。
-3. 标题填写 `Surface Mesh Rebuild v0.2.0`。
-4. 将 [版本说明](RELEASE_v0.2.0.md) 的正文复制到描述中。
-5. 上传项目根目录的 **`SurfaceMeshRebuild-v0.2.0-windows-x64.zip`**。
+2. 标签填写 `v0.2.1`，目标选择 `main`。如果已有同名标签或版本，请先检查，不要覆盖已有发布；下一次修复应使用新的版本号。
+3. 标题填写 `Surface Mesh Rebuild v0.2.1`。
+4. 将 [版本说明](RELEASE_v0.2.1.md) 的正文复制到描述中。
+5. 上传项目根目录的 **`SurfaceMeshRebuild-v0.2.1-windows-x64.zip`**。
 6. 检查标签、说明和附件后点击发布。GitHub 自动生成的 `Source code (zip)` 不含 Python 环境，不能代替这个附件。
 
 完整包大约 56 MB，包含独立 Python 和依赖；放 Releases，避免把二进制安装目录放进代码历史。GitHub 对普通 Git 文件大小有限制，并建议通过 Releases 分发二进制。[官方大文件说明](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github)

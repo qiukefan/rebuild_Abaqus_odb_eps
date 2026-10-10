@@ -1,6 +1,6 @@
 # Abaqus EPS 表面网格重建
 
-**Surface Mesh Rebuild v0.2.0** — 为 Adobe Illustrator 中打开的 Abaqus EPS 重建可见表面网格，减少彩色云图遮挡网格造成的断线，避免把底部隐藏网格一起置顶。
+**Surface Mesh Rebuild v0.2.1** — 为 Adobe Illustrator 中打开的 Abaqus EPS 重建可见表面网格，减少彩色云图遮挡网格造成的断线，避免把底部隐藏网格一起置顶。
 
 Reconstruct visible surface mesh lines in Abaqus EPS exports using the corresponding ODB or a verified reusable model template. A Windows Illustrator JSX front end calls a Python geometry backend; the original contour artwork and annotations are retained.
 
@@ -10,14 +10,14 @@ Reconstruct visible surface mesh lines in Abaqus EPS exports using the correspon
 
 普通用户请到 **[Releases](https://github.com/qiukefan/rebuild_Abaqus_odb_eps/releases)** 下载维护者上传的完整运行包。GitHub 自动生成的 **Source code (zip)** 只含源码，不含 Python 环境。若尚无完整运行包，可按下方“从源码运行”配置环境。
 
-1. 完整解压运行包，保留 `SurfaceMeshRebuild_v0.2.0.jsx` 与 `v0.2.0` 文件夹的相对位置。
+1. 完整解压运行包，保留 `SurfaceMeshRebuild_v0.2.1.jsx` 与 `v0.2.1` 文件夹的相对位置。
 2. 在 Illustrator 打开 **由 Abaqus 直接导出的原始 EPS**。
-3. 选择 **文件 → 脚本 → 其他脚本**，运行 `SurfaceMeshRebuild_v0.2.0.jsx`。
+3. 选择 **文件 → 脚本 → 其他脚本**，运行 `SurfaceMeshRebuild_v0.2.1.jsx`。
 4. 数据来源选择 **选择 ODB 并重建**，选择当前 EPS 对应的 ODB。
 5. 点击 **重建并打开副本**。分析步和帧编号通常留空，程序自动匹配。
 6. 完成后关闭脚本窗口，查看新文档，并按需要另存为 AI。
 
-**不要用 Illustrator 保存覆盖原始 EPS。** 重保存会改变 PostScript 结构。已有编辑请另存保留，再打开原始 Abaqus EPS 重建。更多操作见 [使用说明](表面网格重建_v0.2.0_使用说明.txt)。
+**不要用 Illustrator 保存覆盖原始 EPS。** 重保存会改变 PostScript 结构。已有编辑请另存保留，再打开原始 Abaqus EPS 重建。更多操作见 [使用说明](表面网格重建_v0.2.1_使用说明.txt)。
 
 ## 两种工作方式
 
@@ -28,32 +28,49 @@ Reconstruct visible surface mesh lines in Abaqus EPS exports using the correspon
 
 程序保留彩色云图、色标和文字，替换经过配准的黑色网格线。它不重新运行有限元分析，也不根据变量名重新计算云图。
 
+## v0.2.1：统一与分方向变形倍率
+
+直接读取当前 EPS 的文字标注，无需手工输入倍率：
+
+```text
+Deformation Scale Factor: +1.000e+01
+Deformation Scale Factor: x = +1.000e+00  y = +1.000e+00  z = +1.000e+01
+```
+
+第一行表示统一 10 倍，第二行表示 X=1、Y=1、Z=10。配准、三维遮挡与模板生成统一使用 `原始坐标 + [X倍率, Y倍率, Z倍率] × 位移`，不对原始模型坐标整体拉伸。结果报告记录倍率模式、三个分量及原标注。
+
+新版相机导出脚本同时保存 AUTO / UNIFORM / NONUNIFORM 及有效倍率，用于记录与诊断；**重建仍以当前 EPS 标注为准**。旧相机 JSON、ODB 帧缓存及模板参考倍率不会覆盖当前 EPS 的倍率。缺失、冲突或不完整的倍率标注会明确报错。
+
+倍率变化较大时，请使用 ODB 模式。免 ODB 模板仍须满足“小投影变化、无歧义、覆盖可验证”的条件，不保证 1 倍模板能处理 10 倍 EPS。v0.2.0 的 `.meshcache.json` 可以交给新版校验，但新版模板不供旧版使用。
+
 同模型、同视角、更换工况或帧时，可以尝试模板模式。它不会复制旧帧位移或直接套用旧可见性；节点歧义、视角变化、面重叠、证据不足等情况会拒绝复用，提示使用当前 ODB。
 
 ODB 模式另有模型与帧缓存：相同模型共享原始拓扑，不同 ODB / 帧的位移分别保存。ODB 文件大小或修改时间变化后重新读取。
 
 ## 支持范围
 
-| 项目 | v0.2.0 |
+| 项目 | v0.2.1 |
 | --- | --- |
 | 操作系统 | Windows 64 位 |
 | Illustrator | 已在 29.6.1 实机验证；其他版本未验证 |
 | ODB 读取 | 需要兼容 ODB 的 Abaqus；已使用 Abaqus 2024 验证 |
 | EPS | 原始 Abaqus 单视图矢量 EPS，带可识别的分析步、时间和变形缩放信息 |
 | 网格 | 单个实例，C3D20 / C3D20R 实体外表面 |
-| 变形与投影 | 变形变量 U；透视视图，且配准必须通过 |
+| 变形与投影 | 变形变量 U；EPS 中明确的统一或 X/Y/Z 分方向变形倍率；透视视图，且配准必须通过 |
 | 模板复用 | 同模型、同视角、投影变化较小；遮挡与覆盖须可验证 |
 
-包内相机参数只是候选视角，每份 EPS 都重新配准。其他视角可在 Abaqus 恢复 EPS 导出视图后运行 [相机导出辅助脚本](v0.2.0/ExportCurrentView_v0.2.0.py)，再在 Illustrator 脚本高级设置中选择该 JSON。
+包内相机参数只是候选视角，每份 EPS 都重新配准。其他视角可在 Abaqus 恢复 EPS 导出视图后运行 [相机导出辅助脚本](v0.2.1/ExportCurrentView_v0.2.1.py)，再在 Illustrator 脚本高级设置中选择该 JSON。
+
+操作路径：Abaqus **File → Run Script** → 上述辅助脚本 → 保存到新 JSON 文件；Illustrator 勾选 **高级设置**，在 **相机 JSON** 填写完整路径（不加引号）。辅助脚本记录当前视口，请保持与 EPS 导出时一致的视图。名为 `camera.json` 或 `view.json` 且与 EPS / ODB 同目录时也会自动查找。
 
 暂不支持任意 Illustrator 重保存 EPS、多实例、多视图排版或其他单元类型。当前没有 GPU 后端。
 
 ## 输出与进度
 
-- 默认在源 EPS 旁的 `SurfaceMeshRebuild_v0.2.0` 文件夹生成新的 EPS 和 JSON 校验报告。
+- 默认在源 EPS 旁的 `SurfaceMeshRebuild_v0.2.1` 文件夹生成新的 EPS 和 JSON 校验报告。
 - 在新 Illustrator 文档打开结果，不覆盖原 EPS / ODB，不自动保存为 AI。
 - 提供阶段进度、计时及取消；Abaqus 首次读取与 Illustrator 最终导入可能需要等待。
-- 设置与默认缓存位于 Windows 用户数据目录的 `SurfaceMeshRebuild/v0.2.0`；模板路径显示在窗口中。
+- 设置与默认缓存位于 Windows 用户数据目录的 `SurfaceMeshRebuild/v0.2.1`；模板路径显示在窗口中。
 - 报告、缓存及日志可能包含文件路径和模型信息，反馈问题前请检查需要公开的内容。
 
 ## 从源码运行
@@ -71,20 +88,20 @@ py -3.12 -m venv .venv
 
 如果找不到 Abaqus，在“Abaqus 命令”填写启动器路径，例如 `C:\ABAQUS\2024\Commands\abaqus.bat`。Abaqus 自带 Python 只负责 ODB 提取，不要把它填入几何后端 Python 路径。
 
-`requirements.txt` 指定兼容范围，不是二进制发布包的逐字节重现锁文件；实测版本见 [验证记录](v0.2.0/验证记录_v0.2.0.txt)。
+`requirements.txt` 指定兼容范围，不是二进制发布包的逐字节重现锁文件；实测版本见 [验证记录](v0.2.1/验证记录_v0.2.1.txt)。
 
 ## 测试
 
 无需 Abaqus 或 Illustrator 的公共自动测试：
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s v0.2.0/tests -p "test_*.py" -v
-node test-surface-mesh-v0.2.0.cjs
+.\.venv\Scripts\python.exe -m unittest discover -s v0.2.1/tests -p "test_*.py" -v
+node test-surface-mesh-v0.2.1.cjs
 ```
 
 前端 mock 测试需要 Node.js 18 或更新版本。Windows 进程取消测试仅在 Windows 执行。真实 EPS 的几何对照项在没有私有测试数据时跳过；自动测试不等于真实宿主验证。
 
-v0.2.0 已使用同一模型的两份实际工况文件验证 ODB 重建、双向模板复用及 Illustrator 导入。首次完整 ODB 重建实测约 42 秒，直接模板计算约 2 秒；耗时依机器与文件变化。方法、误差及限制见 [验证记录](v0.2.0/验证记录_v0.2.0.txt)。真实模型数据不随源码发布。
+v0.2.0 已使用同一模型的两份实际工况文件验证 ODB 重建、双向模板复用及 Illustrator 导入，首次完整 ODB 重建实测约 42 秒、直接模板计算约 2 秒。v0.2.1 新增变形倍率回归；当前版本的实测结果、误差及限制见 [验证记录](v0.2.1/验证记录_v0.2.1.txt)。耗时依机器与文件变化，真实模型数据不随源码发布。
 
 ## 构建完整运行包
 
@@ -92,20 +109,20 @@ v0.2.0 已使用同一模型的两份实际工况文件验证 ODB 重建、双�
 
 ```powershell
 py -3.12 -m pip install --only-binary=:all: --target .build/deps -r requirements.txt
-py -3.12 v0.2.0/build_portable_runtime.py --python-root "C:\Python312" --deps-root ".build\deps"
-py -3.12 v0.2.0/build_release.py
+py -3.12 v0.2.1/build_portable_runtime.py --python-root "C:\Python312" --deps-root ".build\deps"
+py -3.12 v0.2.1/build_release.py
 ```
 
-将 `C:\Python312` 改为实际安装目录。构建工具拒绝覆盖已有 `runtime` / `_deps`，重新构建请使用干净的源码检出目录。输出为根目录的 `SurfaceMeshRebuild-v0.2.0-windows-x64.zip`，用于 Releases，不提交进 Git 历史。
+将 `C:\Python312` 改为实际安装目录。构建工具拒绝覆盖已有 `runtime` / `_deps`，重新构建请使用干净的源码检出目录。输出为根目录的 `SurfaceMeshRebuild-v0.2.1-windows-x64.zip`，用于 Releases，不提交进 Git 历史。
 
 ## 目录
 
 ```text
-SurfaceMeshRebuild_v0.2.0.jsx  Illustrator 界面与后台任务入口
-v0.2.0/backend/               EPS、ODB 缓存、配准、遮挡及模板重建
-v0.2.0/resources/             需要实际配准验证的相机候选
-v0.2.0/tests/                 公共单元测试
-v0.2.0/launch_job.vbs         Windows 隐藏启动器
+SurfaceMeshRebuild_v0.2.1.jsx  Illustrator 界面与后台任务入口
+v0.2.1/backend/               EPS、ODB 缓存、配准、遮挡及模板重建
+v0.2.1/resources/             需要实际配准验证的相机候选
+v0.2.1/tests/                 公共单元测试
+v0.2.1/launch_job.vbs         Windows 隐藏启动器
 docs/                        发布步骤与版本说明
 ```
 
