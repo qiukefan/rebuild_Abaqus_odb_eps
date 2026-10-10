@@ -6,7 +6,7 @@
 
 ## 下载
 
-普通 Windows 用户下载维护者上传的 **`表面网格重建_v0.2.0.zip`** 并完整解压。GitHub 自动生成的 **Source code** 不含 Python 环境。
+普通 Windows 用户下载维护者上传的 **`SurfaceMeshRebuild-v0.2.0-windows-x64.zip`** 并完整解压。GitHub 自动生成的 **Source code** 不含 Python 环境。
 
 ## 要求与使用
 
