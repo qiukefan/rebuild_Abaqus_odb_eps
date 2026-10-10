@@ -1,0 +1,67 @@
+表面网格重建 v0.2.0（Windows / Illustrator + Abaqus）
+
+快速使用
+1. 完整解压压缩包到一个固定目录，例如 D:\AI_Mesh。保留 JSX 与 v0.2.0 文件夹的相对位置。
+2. 在 Illustrator 打开由 Abaqus 直接导出的原始 EPS。
+3. 文件 > 脚本 > 其他脚本，选择 SurfaceMeshRebuild_v0.2.0.jsx。
+4. 数据来源选“选择 ODB 并重建”，点击“选择…”选择与当前 EPS 对应的 ODB。
+5. 点击“重建并打开副本”。分析步和帧编号通常都留空。
+6. 处理完成后，关闭脚本窗口即可查看新文档；按需要另存为 AI。
+
+程序读取 EPS 中的 Step、Step Time、Primary Var，以及存在时的 ODB 名称、Increment、变形缩放系数。
+Step / Step Time 是帧匹配依据，Increment 是额外交叉校验；不会把 Step Time 当作帧编号。
+时间文字有舍入，若可能对应多个帧，会要求在高级设置指定并校验帧编号，不会擅自猜测。
+保留 EPS 的云图、色标、变量名及其他文字，只替换已配准的模型黑色网格线。
+这里“求解重绘”指投影配准、表面拓扑及遮挡计算，不重新运行 Abaqus 有限元求解。
+
+下次不读取 ODB
+第一次成功后，程序会保存一个独立的 .meshcache.json 模型模板，并记住路径。
+打开同模型、同视角的新工况或新帧 EPS，数据来源改为“选择模型缓存重建（无需 ODB）”。
+程序从当前 EPS 恢复当前节点位置，使用缓存中的连接关系重新校验表面。
+不会复制上一帧的位移或沿用上一帧的可见性。
+免 ODB 模式适合相同视角、投影变化较小的文件；节点歧义、面重叠、缺少网格证据、画框变化等情况会停止，并提示使用对应 ODB。
+这是保守限制，不代表缓存文件损坏。切回 ODB 模式重建，会保存新的参考模板。
+该模板可以复制到其他电脑；使用时不需要模板最初对应的 ODB 或 EPS 仍然存在。
+
+另有帧缓存
+ODB 模式会分别保存“原始模型拓扑”和“当前 ODB 当前帧位移”。
+同模型的不同 ODB 可共用模型数据；不同帧的位移分别保存。
+再次处理同一 ODB 的同一帧时，不会重新启动 Abaqus 读取数据，但会重新匹配当前 EPS 和计算遮挡。
+如果 ODB 大小或修改时间变了，会重新读取。
+默认缓存在 Windows 用户数据目录的 SurfaceMeshRebuild/v0.2.0/cache；结果窗口会显示可复制的模型模板路径。
+
+输出及原文件
+默认结果位于原 EPS 旁的 SurfaceMeshRebuild_v0.2.0 文件夹，可在窗口指定其他目录。
+每次生成新的 EPS 和 JSON 校验报告，不覆盖原 EPS / ODB / 旧版本脚本，不自动保存为 AI。
+不要先用 Illustrator 保存覆盖原 Abaqus EPS；Illustrator 会改写 EPS 结构，本版不解析这种重保存文件。
+已有编辑请先另存保留，然后重新打开原始 Abaqus EPS 再运行。
+如果只复制了 JSX，首次运行会要求定位完整解压后的 v0.2.0 程序文件夹，之后记住位置。
+
+运行环境和高级设置
+已包含 Windows 64 位 Python、NumPy、SciPy、Shapely，无需安装 Python 或运行 pip。
+ODB 首次读取需要电脑上已有兼容该 ODB 的 Abaqus；本机已用 Abaqus 2024 验证。
+若找不到 Abaqus，在高级设置的“Abaqus 命令”填写启动文件，例如 C:\ABAQUS\2024\Commands\abaqus.bat。
+Python 路径通常留空。不要把 abaqus python 填到这里，Python 路径是随包几何计算器的可选替代解释器。
+计算在后台执行，窗口显示阶段、进度，并可取消；首次打开大型 ODB、导入最终 EPS 时可能要等待。
+取消仅针对本次启动的计算进程，不结束其他 Abaqus 或 Illustrator 会话。
+
+视角
+目前优先支持你的现有固定透视视角。程序会尝试本包视角、已验证视角缓存、EPS/ODB 旁的 camera.json、view.json 和 abaqus.rpy，并对每份 EPS 重新配准。
+如果视角不同而无法自动确认，在 Abaqus 恢复该 EPS 的原始视角，File > Run Script 执行 v0.2.0/ExportCurrentView_v0.2.0.py，保存相机 JSON。
+在 Illustrator 脚本高级设置选择该 JSON 再运行。相机配置也必须通过实际线条校验。
+相机辅助导出脚本不修改模型或视图；请选择一个尚不存在的新 JSON 文件名。
+
+v0.2.0 当前支持范围
+Windows 64 位；原始 Abaqus 矢量 EPS；单网格实例；C3D20 / C3D20R 实体表面；变形变量 U；透视视图。
+不是任意 EPS / 任意单元 / 多视图排版的通用恢复器。无法确认时会报错停止，不强行生成。
+免 ODB 模式按 EPS 的分段直线恢复网格；ODB 模式按二次单元几何细分，二者曲线近似略有差别。
+已在现有 Py30 / Py60、Step-2、Step Time=200.0 的两份原始 EPS 上验证双向缓存复用，且在 Illustrator 29.6.1 实际导入检查。
+
+故障排查
+“找不到结果”：v0.2.0 会现场计算，不需要 v1.8/results。请确认完整程序包已解压。
+“启动无状态”：检查 Windows Script Host 是否可用；提示中的任务目录包含 request.json、status.json、error.log。
+“ODB 与 EPS 不一致”：重新选择 EPS 标注对应的 ODB。不要手改 EPS 标注绕过校验。
+“模板免 ODB 校验未通过”：切回“选择 ODB 并重建”，选当前工况对应的 ODB。
+“视角无法确定”：使用高级设置的相机 JSON，方法见上文。
+
+第三方依赖许可保留在 v0.2.0/runtime/LICENSE.txt 和 v0.2.0/_deps/*dist-info 及相关库目录中。

@@ -1,0 +1,12 @@
+* text=auto
+*.py text eol=lf
+*.jsx text eol=lf
+*.cjs text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.vbs text eol=crlf
+*.zip binary
+*.png binary
+*.odb binary
+*.eps binary
+*.ai binary

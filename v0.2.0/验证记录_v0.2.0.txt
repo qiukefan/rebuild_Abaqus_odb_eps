@@ -1,0 +1,55 @@
+表面网格重建 v0.2.0 验证记录
+2026-10-10 / Windows / Illustrator 29.6.1 / Abaqus 2024
+
+真实源数据
+Py30、Py60 两份 DT300 / 100cycle 原始 EPS 和 ODB。
+自动识别 Step-2、Step Time=200.0、Primary Var=PEMAG；两者均 frame1800。
+EPS 中增量分别为 2333、2298，均与各自 ODB 匹配。
+相同原始模型：8443 节点、1444 个 C3D20R 单元；1692 个外表面、3384 条外表面边。
+模型 hash 一致；两工况 U 数据 hash 不同，按工况分别缓存。
+
+端到端
+Illustrator JSX -> UTF-16LE VBS -> 隐藏便携 Python -> Abaqus 只读提取 -> 配准 -> 遮挡 -> 新 EPS -> Illustrator 导入：通过。
+真实首次完整 ODB 流程约 42 秒（Py60）；结果导入 12380 条路径。
+模板流程（Py30 模板处理 Py60）从 Illustrator 发起并导入约 11 秒，后台约 6.5 秒。
+直接调用模板计算约 2.2 秒，解释器及依赖首次启动、Illustrator 导入另计。
+重复帧缓存读取约 0.17 秒（不含后续重建），验证时禁用了 Abaqus 启动函数仍成功。
+这些是本机实测，不是所有文件的性能承诺。
+
+几何和可见性
+Py30 模板 -> Py60、Py60 模板 -> Py30 两个方向均通过。
+模板模式未读取目标 ODB、目标位移或目标三维网格；结果坐标来自目标 EPS。
+当前 621 个正面单元内部交叠面积为 0；与当前彩色面覆盖差为 0（边界容差 0.0012 pt）。
+两个方向恢复的完整可见网格边均与 ODB 方法一致，无额外网格边。
+ODB 数值裁剪另产生 65 条约 0.00004—0.00012 pt 的极短片段，模板不生成这些数值残片。
+EPS 分段直线与 ODB 二次曲线近似最大距离约 0.093 pt（当前线宽约 0.567 pt）。
+Illustrator 原生渲染尺寸均 2079 x 1029，检查边界、缺口区域、色标和文字。
+
+错误与保护
+Py30 ODB 配 Py60 EPS：拒绝。
+Py60 指定 frame1799，与 EPS 的时间/增量不符：拒绝。
+缓存损坏、模型改变、源文件计算期间改变、歧义帧：有回归检查。
+取消检查会终止本任务创建的进程树；按独立 Job Object 归属处理，不按进程名称批量关闭。
+中文、空格、& 所在任务路径和异步隐藏启动：通过。
+原 EPS / ODB 未覆盖；测试结束恢复原活动文档，仍为 saved=true。
+窗口已在 Illustrator 检查，并修正隐藏高级设置仍占用空间的问题。
+
+自动检查
+原端到端验证批次：37 项 Python 测试通过；42 项前端 Node mock 测试通过。
+自动测试覆盖与实机联调分别执行；mock 不代表所有 Illustrator 版本都已验证。
+未对其他模型、其他视角、其他 Abaqus 或 Illustrator 版本做实际文件验证。
+
+开源发布准备复核（2026-10-10）
+仅复制允许公开的源码到独立目录，不携带 runtime、_deps、ODB、EPS、缓存及私有几何对照结果。
+使用单独提供的 Python 依赖运行：47 项 Python 测试中 46 项通过、1 项私有几何对照按预期跳过。
+42 项前端 Node mock 测试通过。新增构建测试检查运行时/依赖架构、缺失依赖、目录冲突与许可证保留。
+发布脚本缺少 runtime 时明确失败，已有 ZIP 保持不变；源码及运行包分别发布。
+此次复核不重复原端到端联调，也不扩大上面的模型与宿主支持范围。
+
+实现参考
+Abaqus View API（相机导出辅助脚本）：
+https://docs.software.vt.edu/abaqusv2025/English/SIMACAEKERRefMap/simaker-c-viewpyc.htm
+Abaqus 用户输入 API：
+https://docs.software.vt.edu/abaqusv2025/English/SIMACAEKERRefMap/simaker-c-utlgetinputpyc.htm
+Windows Job Objects（仅终止本任务进程树）：
+https://learn.microsoft.com/windows/win32/procthread/job-objects
