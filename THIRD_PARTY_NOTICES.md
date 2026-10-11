@@ -8,10 +8,10 @@
 
 | 组件 | 当前验证包版本 | 包内许可位置 |
 | --- | --- | --- |
-| CPython | 3.12.14 | `v0.2.1/runtime/LICENSE.txt`，包括随附组件声明 |
-| NumPy | 2.5.3 | `v0.2.1/_deps/numpy-2.5.3.dist-info/licenses/` |
-| SciPy | 1.18.1 | `v0.2.1/_deps/scipy-1.18.1.dist-info/LICENSE.txt` |
-| Shapely | 2.1.2 | `v0.2.1/_deps/shapely-2.1.2.dist-info/licenses/LICENSE.txt` |
+| CPython | 3.12.14 | `v0.2.2/runtime/LICENSE.txt`，包括随附组件声明 |
+| NumPy | 2.5.3 | `v0.2.2/_deps/numpy-2.5.3.dist-info/licenses/` |
+| SciPy | 1.18.1 | `v0.2.2/_deps/scipy-1.18.1.dist-info/LICENSE.txt` |
+| Shapely | 2.1.2 | `v0.2.2/_deps/shapely-2.1.2.dist-info/licenses/LICENSE.txt` |
 | 随 Shapely 分发的 GEOS | 以 wheel 为准 | 同目录 `LICENSE_GEOS`（LGPL 2.1 文本） |
 | 随附 Microsoft 运行库 | 以 CPython / wheel 为准 | Python 许可通知及 Shapely 的 `LICENSE_win32` |
 
