@@ -136,6 +136,7 @@ docs/                        发布步骤与版本说明
 原图：
 
 <img width="950" height="500" alt="image" src="https://github.com/user-attachments/assets/dfe62e48-ef3e-4a20-a86a-4ccb4f36652c" />
+
 处理后：
 
 <img width="950" height="500" alt="image" src="https://github.com/user-attachments/assets/6fdf94f1-20d0-4d3e-896d-fc23853be71f" />
