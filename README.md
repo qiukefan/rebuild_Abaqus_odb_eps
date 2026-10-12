@@ -132,6 +132,7 @@ v0.2.2/launch_job.vbs         Windows 隐藏启动器
 docs/                        发布步骤与版本说明
 ```
 ## 效果
+
 原图：
 <img width="950" height="500" alt="image" src="https://github.com/user-attachments/assets/dfe62e48-ef3e-4a20-a86a-4ccb4f36652c" />
 处理后：
